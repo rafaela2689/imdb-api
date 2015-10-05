@@ -1,5 +1,6 @@
 var express = require('express'); // Express App include
 var bodyParser = require('body-parser'); // Body parser for fetch posted data
+var timeout = require('connect-timeout');
 
 var directors = require('./routes/directors');
 
