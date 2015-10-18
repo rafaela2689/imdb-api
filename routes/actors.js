@@ -13,7 +13,7 @@ var connection = mysql.createConnection({ // Mysql Connection
 // get all actors
 router.route('/').get(function(req, res){
 
-    connection.query("select * from actors order by id", function(err, rows, fields){
+    connection.query("select * from actors order by id limit 10", function(err, rows, fields){
         if (err){
             console.log(err);
             throw err;

@@ -13,7 +13,7 @@ var connection = mysql.createConnection({ // Mysql Connection
 // get all directors
 router.route('/').get(function(req, res){
 
-    connection.query("select * from directors order by id",function(err, rows, fields){
+    connection.query("select * from directors order by id limit 10",function(err, rows, fields){
         if(rows.length != 0){
             res.json(rows);
         }else{
@@ -23,9 +23,9 @@ router.route('/').get(function(req, res){
 });
 
 // get directors with films
-var query1 = "SELECT dir.id AS 'id_director', dir.first_name AS 'first_name', dir.last_name AS 'last_name', mov.id AS 'id_film', mov.name, mov.year, mov.rank FROM directors dir ";
+var query1 = "SELECT dir.id AS 'id_director', dir.first_name AS 'first_name', dir.last_name AS 'last_name', mov.id AS 'id_film' FROM directors dir ";
 var query2 = "JOIN movies_directors md ON (md.director_id = dir.id) ";
-var query3 = "JOIN movies mov ON (mov.id = md.movie_id) ORDER BY dir.id;";
+var query3 = "JOIN movies mov ON (mov.id = md.movie_id) ORDER BY dir.id limit 10;";
 router.route('/movies').get(function(req, res){
     connection.query(query1 + query2 + query3, function(err, rows, fields){
             if (err) {
@@ -39,13 +39,7 @@ router.route('/movies').get(function(req, res){
                     var find = false;
                     directors.forEach(function(d){
                         if (d._id === row.id_director) {
-                            var movie = {
-                                id_movie : row.id_film,
-                                name : row.name,
-                                year : row.year,
-                                rank : row.rank
-                            };
-                            d.movies.push(movie);
+                            d.movies.push(row.id_film);
                             find = true;
                         };
                     });
@@ -55,13 +49,7 @@ router.route('/movies').get(function(req, res){
                         director.first_name = row.first_name;
                         director.last_name = row.last_name;
                         director.movies = [];
-                        var movie = {
-                                id_movie : row.id_film,
-                                name : row.name,
-                                year : row.year,
-                                rank : row.rank
-                            };
-                        director.movies.push(movie);
+                        director.movies.push(row.id_film);
                         directors.push(director); 
                     }
                 });

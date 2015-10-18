@@ -11,13 +11,13 @@ var connection = mysql.createConnection({ // Mysql Connection
 });
 
 // get movies with directors, roles and actors
-var query_actor = "SELECT m.id, m.name, m.year, m.rank, d.id AS 'director_id', d.first_name, d.last_name, r.role, a.id AS 'actor_id', a.first_name AS 'actor_first_name', a.last_name AS 'actor_last_name', a.gender from movies m ";
-var query_actor2 = "JOIN movies_directors md ON md.movie_id = m.id ";
-var query_actor3 = "JOIN directors d ON d.id = md.director_id ";
-var query_actor4 = "JOIN roles r ON r.movie_id = m.id JOIN actors a ON a.id = r.actor_id "; 
-var query_5 = "ORDER BY m.id;";
+var query_movie_1 = "SELECT m.id, m.name, m.year, m.rank, d.id AS 'director_id', r.role, a.id AS 'actor_id' from movies m ";
+var query_movie_2 = "JOIN movies_directors md ON md.movie_id = m.id ";
+var query_movie_3 = "JOIN directors d ON d.id = md.director_id ";
+var query_movie_4 = "JOIN roles r ON r.movie_id = m.id JOIN actors a ON a.id = r.actor_id "; 
+var query_movie_5 = "ORDER BY m.id limit 1000;";
 router.route('/').get(function(req, res) {
-    connection.query(query_actor + query_actor2 + query_actor3 + query_actor4 + query_5, function(err, rows, fields) {
+    connection.query(query_movie_1 + query_movie_2 + query_movie_3 + query_movie_4 + query_movie_5, function(err, rows, fields) {
         if (err) {
             console.log(err);
             throw err;
@@ -35,19 +35,11 @@ router.route('/').get(function(req, res) {
                             };
                         });
                         if (!director_find) {
-                            var director = {
-                                id_director : row.director_id,
-                                first_name : row.first_name,
-                                last_name : row.last_name
-                            };
-                            m.directors.push(director);
+                            m.directors.push(row.director_id);
                         };
                         var role = {
                              role: row.role, 
-                             id_actor: row.actor_id,
-                             actor_first_name : row.actor_first_name,
-                             actor_last_name : row.actor_last_name,
-                             gender : row.gender
+                             id_actor: row.actor_id
                         };
                         m.roles.push(role);
                         find = true;
@@ -60,25 +52,13 @@ router.route('/').get(function(req, res) {
                     movie.year = row.year;
                     movie.rank = row.rank;
                     movie.directors = [];
-                    if (row.director_id) {
-                        var director = {
-                                id_director : row.director_id,
-                                first_name : row.first_name,
-                                last_name : row.last_name
-                        };
-                        movie.directors.push(director);    
+                    movie.directors.push(row.director_id);
+                    movie.roles = [];                   
+                    var role = {
+                        role: row.role, 
+                        id_actor: row.actor_id,
                     };
-                    movie.roles = [];
-                    if (row.role || row.actor_id) {
-                         var role = {
-                             role: row.role, 
-                             id_actor: row.actor_id,
-                             actor_first_name : row.actor_first_name,
-                             actor_last_name : row.actor_last_name,
-                             gender : row.gender
-                        };
-                        movie.roles.push(role);    
-                    };
+                    movie.roles.push(role);
                     movies.push(movie);
                 };
             });
@@ -90,11 +70,11 @@ router.route('/').get(function(req, res) {
 });
 
 // get movies with roles and actors
-var query_actor = "SELECT m.id, m.name, m.year, m.rank, r.role, a.id AS 'actor_id', a.first_name, a.last_name, a.gender from movies m ";
-var query_actor4 = "JOIN roles r ON r.movie_id = m.id JOIN actors a ON a.id = r.actor_id "; 
-var query_5 = "ORDER BY m.id;";
+var query_roles_1 = "SELECT m.id, m.name, m.year, m.rank, r.role, a.id AS 'actor_id' from movies m ";
+var query_roles_2 = "JOIN roles r ON r.movie_id = m.id JOIN actors a ON a.id = r.actor_id "; 
+var query_roles_3 = "ORDER BY m.id limit 10;";
 router.route('/roles').get(function(req, res) {
-    connection.query(query_actor + query_actor4 + query_5, function(err, rows, fields) {
+    connection.query(query_roles_1 + query_roles_2 + query_roles_3, function(err, rows, fields) {
         if (err) {
             console.log(err);
             throw err;
@@ -107,10 +87,7 @@ router.route('/roles').get(function(req, res) {
                     if (m._id === row.id) {
                         var role = {
                              role: row.role, 
-                             id_actor: row.actor_id,
-                             first_name : row.first_name,
-                             last_name : row.last_name,
-                             gender : row.gender
+                             id_actor: row.actor_id
                         };
                         m.roles.push(role);
                         find = true;
@@ -123,16 +100,11 @@ router.route('/roles').get(function(req, res) {
                     movie.year = row.year;
                     movie.rank = row.rank;
                     movie.roles = [];
-                    if (row.role || row.actor_id) {
-                        var role = {
-                             role: row.role, 
-                             id_actor: row.actor_id,
-                             first_name : row.first_name,
-                             last_name : row.last_name,
-                             gender : row.gender
-                        };
-                        movie.roles.push(role);    
+                    var role = {
+                        role: row.role, 
+                        id_actor: row.actor_id                           
                     };
+                    movie.roles.push(role);
                     movies.push(movie);
                 };
             });
@@ -144,12 +116,12 @@ router.route('/roles').get(function(req, res) {
 });
 
 // get movies with directors
-var query_actor = "SELECT m.id, m.name, m.year, m.rank, d.id AS 'director_id', d.first_name, d.last_name from movies m ";
-var query_actor2 = "JOIN movies_directors md ON md.movie_id = m.id ";
-var query_actor3 = "JOIN directors d ON d.id = md.director_id "; 
-var query_5 = "ORDER BY m.id;";
+var query_dir_1 = "SELECT m.id, m.name, m.year, m.rank, d.id AS 'director_id', d.first_name, d.last_name from movies m ";
+var query_dir_2 = "JOIN movies_directors md ON md.movie_id = m.id ";
+var query_dir_3 = "JOIN directors d ON d.id = md.director_id "; 
+var query_dir_4 = "ORDER BY m.id limit 10;";
 router.route('/directors').get(function(req, res) {
-    connection.query(query_actor + query_actor2 + query_actor3 + query_5, function(err, rows, fields) {
+    connection.query(query_dir_1 + query_dir_2 + query_dir_3 + query_dir_4, function(err, rows, fields) {
         if (err) {
             console.log(err);
             throw err;
@@ -159,13 +131,8 @@ router.route('/directors').get(function(req, res) {
             rows.forEach(function(row) {
                 var find = false;
                 movies.forEach(function(m) {
-                    if (m._id === row.id) {
-                        var director = {
-                                id_director : row.director_id,
-                                first_name : row.first_name,
-                                last_name : row.last_name
-                        };
-                        m.directors.push(director);
+                    if (m._id === row.id) {                   
+                        m.directors.push(row.director_id);
                         find = true;                                
                     }
                 });
@@ -176,14 +143,7 @@ router.route('/directors').get(function(req, res) {
                     movie.year = row.year;
                     movie.rank = row.rank;
                     movie.directors = [];
-                    if (row.director_id) {
-                        var director = {
-                                id_director : row.director_id,
-                                first_name : row.first_name,
-                                last_name : row.last_name
-                        };
-                        movie.directors.push(director);    
-                    };
+                    movie.directors.push(row.director_id);                
                     movies.push(movie);
                 };
             });
@@ -200,6 +160,7 @@ router.route('/').post(function(req, res){
     var input = JSON.parse(JSON.stringify(req.body));
 
     var data = {
+    	id: input.id,
         name : input.name,
         year : input.year,
         rank : input.rank
