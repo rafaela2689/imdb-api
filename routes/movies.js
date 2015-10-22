@@ -169,7 +169,7 @@ router.route('/').post(function(req, res){
     connection.query("insert into movies set ? ", data, function(err, rows, fields){
         if (err){
             console.log(err);
-            throw err;
+            return next(err);
         }
         
         res.json({message: 'movie inserted with success..'});
@@ -189,9 +189,9 @@ router.route('/:id').put(function(req, res){
     connection.query("update movies set ? where id = ?", [data, id], function(err, rows, fields) {
         if (err) {
             console.log(err);
-            throw err;
+           return next(err);
         };
-
+        console.log('passei');
         res.json({message : 'movie updated with success'});
     });
 });
