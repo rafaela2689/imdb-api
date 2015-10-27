@@ -13,12 +13,12 @@ var connection = mysql.createConnection({ // Mysql Connection
 // get all directors
 router.route('/').get(function(req, res){
 
-    connection.query("select * from directors order by id limit 10",function(err, rows, fields){
-        if(rows.length != 0){
-            res.json(rows);
-        }else{
-            res.json({message: 'no books found..'});
+    connection.query("select * from directors order by id limit 80000",function(err, rows, fields){
+        if (err) {
+            console.log(err);
+            next(err);
         }
+        res.json(rows);
     });
 });
 
