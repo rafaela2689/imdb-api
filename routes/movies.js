@@ -10,7 +10,20 @@ var connection = mysql.createConnection({ // Mysql Connection
     database : 'imdb',
 });
 
-// get movies with directors, roles and actors
+// get movies
+router.route('/').get(function(req, res) {
+
+    connection.query('select * from movies limit 300000', function(err, rows, fields) {
+        if (err) {
+            console.log(err);
+            return next(err);
+        }
+
+        res.json(rows);
+    });
+});
+
+/*// get movies with directors, roles and actors
 var query_movie_1 = "SELECT m.id, m.name, m.year, m.rank, d.id AS 'director_id', r.role, a.id AS 'actor_id' from movies m ";
 var query_movie_2 = "JOIN movies_directors md ON md.movie_id = m.id ";
 var query_movie_3 = "JOIN directors d ON d.id = md.director_id ";
@@ -67,12 +80,12 @@ router.route('/').get(function(req, res) {
             res.json({message: 'no books found...'});
         };
     });
-});
+});*/
 
 // get movies with roles and actors
 var query_roles_1 = "SELECT m.id, m.name, m.year, m.rank, r.role, a.id AS 'actor_id' from movies m ";
 var query_roles_2 = "JOIN roles r ON r.movie_id = m.id JOIN actors a ON a.id = r.actor_id "; 
-var query_roles_3 = "ORDER BY m.id limit 10;";
+var query_roles_3 = "ORDER BY m.id limit 300000;";
 router.route('/roles').get(function(req, res) {
     connection.query(query_roles_1 + query_roles_2 + query_roles_3, function(err, rows, fields) {
         if (err) {
@@ -119,7 +132,7 @@ router.route('/roles').get(function(req, res) {
 var query_dir_1 = "SELECT m.id, m.name, m.year, m.rank, d.id AS 'director_id', d.first_name, d.last_name from movies m ";
 var query_dir_2 = "JOIN movies_directors md ON md.movie_id = m.id ";
 var query_dir_3 = "JOIN directors d ON d.id = md.director_id "; 
-var query_dir_4 = "ORDER BY m.id limit 10;";
+var query_dir_4 = "ORDER BY m.id limit 300000;";
 router.route('/directors').get(function(req, res) {
     connection.query(query_dir_1 + query_dir_2 + query_dir_3 + query_dir_4, function(err, rows, fields) {
         if (err) {
@@ -160,10 +173,10 @@ router.route('/').post(function(req, res){
     var input = JSON.parse(JSON.stringify(req.body));
 
     var data = {
-    	id: input.id,
+    	id: parseInt(input.id),
         name : input.name,
-        year : input.year,
-        rank : input.rank
+        year : parseInt(input.year),
+        rank : parseInt(input.rank)
     };
 
     connection.query("insert into movies set ? ", data, function(err, rows, fields){
@@ -178,12 +191,12 @@ router.route('/').post(function(req, res){
 
 router.route('/:id').put(function(req, res){
     var input = JSON.parse(JSON.stringify(req.body));
-    var id = req.params.id;
+    var id = parseInt(req.params.id);
 
     var data = {
         name : input.name,
-        year : input.year,
-        rank : input.rank
+        year : parseInt(input.year),
+        rank : parseInt(input.rank)
     };
 
     connection.query("update movies set ? where id = ?", [data, id], function(err, rows, fields) {
@@ -191,13 +204,12 @@ router.route('/:id').put(function(req, res){
             console.log(err);
            return next(err);
         };
-        console.log('passei');
         res.json({message : 'movie updated with success'});
     });
 });
 
 router.route('/:id').delete(function(req, res){
-    var id = req.params.id;
+    var id = parseInt(req.params.id);
 
     connection.query("delete from movies where id = ?", id, function(err, rows, fields) {
         if (err) {
